@@ -14,4 +14,7 @@
 
 - name: "flat"
   walkable: True
+  categories:
+    - grass
+    - dirt
 

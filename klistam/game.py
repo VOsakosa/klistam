@@ -8,6 +8,8 @@ from typing_extensions import Self
 import pygame
 from attr import define
 
+from world.create_world import World, Scene
+
 KG: Final = 72
 WIDTH: Final = 10
 HEIGHT: Final = 8
@@ -18,7 +20,8 @@ class Game:
     """The main class of the game that handles user input on the top level."""
     screen: pygame.Surface
     hud: 'HUD'
-    field_view: 'FieldView'
+    scene: Scene
+    scene_view: 'SceneView'
 
     def handle_key(self, event) -> None:
         pass
@@ -36,7 +39,7 @@ class Game:
     def create(cls) -> Self:
         pygame.init()
         screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
-        return cls(screen, HUD(), FieldView())
+        return cls(screen, HUD(), scene=World.generate().get_terrain(width=WIDTH, height=HEIGHT), scene_view=SceneView())
 
     def run(self) -> None:
         clock = pygame.time.Clock()
@@ -58,7 +61,7 @@ class Game:
                     # self.draw_kachel()
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)
-                    self.field_view.draw(self.screen)
+                    self.scene_view.draw(self.screen, self.scene)
                     self.hud.draw()
                     pygame.display.flip()
                     clock.tick(40)
@@ -82,21 +85,23 @@ assets_folder = Path(__file__).parents[1] / "assets"
 
 @cache
 def get_terrain(name: str) -> pygame.Surface:
+    if name not in ["dirt", "grass", "tree"]:
+        name = "tree"
     return pygame.image.load(assets_folder / "images" / "terrain" / f"{name}.png").convert_alpha()
 
 
 @define
-class FieldView:
-    """Shows the field to the user."""
+class SceneView:
+    """Shows the scene to the user."""
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pygame.Surface, scene: Scene):
         for y in range(HEIGHT):
             for x in range(WIDTH):
-                self.draw_kachel(screen, x, y)
+                self.draw_kachel(terrain=scene.get_terrain_file(x, y), screen=screen, x=x, y=y)
 
-    def draw_kachel(self, screen: pygame.Surface, x: int, y: int) -> None:
+    def draw_kachel(self, terrain: str, screen: pygame.Surface, x: int, y: int) -> None:
         """Draw a single part of the map."""
-        dreck = get_terrain("dirt")
+        dreck = get_terrain(terrain)
         screen.blit(dreck, (x * KG, y * KG, KG, KG), (0, 0, dreck.get_width(), dreck.get_height()))
 
 
