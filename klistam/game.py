@@ -29,12 +29,12 @@ class Game:
     @classmethod
     def create(cls) -> Self:
         pygame.init()
-        clock = pygame.time.Clock()
         screen = pygame.display.set_mode(
             (KG * WIDTH, KG * HEIGHT))
         return cls(screen)
 
     def run(self) -> None:
+        clock = pygame.time.Clock()
         try:
             cont = True
             while cont:
@@ -63,4 +63,4 @@ class Game:
 
 
 if __name__ == '__main__':
-    Game().main()
+    Game.create().run()
