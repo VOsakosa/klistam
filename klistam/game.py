@@ -1,4 +1,6 @@
 import traceback
+from functools import cache
+from pathlib import Path
 from typing import Final
 
 from typing_extensions import Self
@@ -6,7 +8,7 @@ from typing_extensions import Self
 import pygame
 from attr import define
 
-KG: Final = 64
+KG: Final = 72
 WIDTH: Final = 10
 HEIGHT: Final = 8
 
@@ -16,6 +18,7 @@ class Game:
     """The main class of the game that handles user input on the top level."""
     screen: pygame.Surface
     hud: 'HUD'
+    field_view: 'FieldView'
 
     def handle_key(self, event) -> None:
         pass
@@ -33,7 +36,7 @@ class Game:
     def create(cls) -> Self:
         pygame.init()
         screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
-        return cls(screen, HUD())
+        return cls(screen, HUD(), FieldView())
 
     def run(self) -> None:
         clock = pygame.time.Clock()
@@ -55,6 +58,7 @@ class Game:
                     # self.draw_kachel()
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)
+                    self.field_view.draw(self.screen)
                     self.hud.draw()
                     pygame.display.flip()
                     clock.tick(40)
@@ -71,6 +75,29 @@ class HUD:
 
     def draw(self):
         pass
+
+
+assets_folder = Path(__file__).parents[1] / "assets"
+
+
+@cache
+def get_terrain(name: str) -> pygame.Surface:
+    return pygame.image.load(assets_folder / "images" / "terrain" / f"{name}.png").convert_alpha()
+
+
+@define
+class FieldView:
+    """Shows the field to the user."""
+
+    def draw(self, screen: pygame.Surface):
+        for y in range(HEIGHT):
+            for x in range(WIDTH):
+                self.draw_kachel(screen, x, y)
+
+    def draw_kachel(self, screen: pygame.Surface, x: int, y: int) -> None:
+        """Draw a single part of the map."""
+        dreck = get_terrain("dreck")
+        screen.blit(dreck, (x * KG, y * KG, KG, KG), (0, 0, dreck.get_width(), dreck.get_height()))
 
 
 if __name__ == '__main__':
