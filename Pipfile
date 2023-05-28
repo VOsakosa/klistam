@@ -8,6 +8,7 @@ attrs = "*"
 pygame = "*"
 numpy = "*"
 typing-extensions = "*"
+pyyaml = "*"
 
 [dev-packages]
 

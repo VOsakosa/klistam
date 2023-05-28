@@ -1,6 +1,7 @@
 """
 script with terrain information
 """
+from datetime import datetime
 from typing import Optional, Any
 from attrs import define, field
 import yaml
@@ -17,7 +18,7 @@ class Field:
         return self.name + (f"[{self.parent}]" if self.parent else "")
 
     @classmethod
-    def generate_fields(cls, parent: "Field | None", obj_info: [str | dict[str, Any]]) -> list["Field"]:
+    def generate_fields(cls, parent: "Field | None", obj_info: str | dict[str, Any]) -> list["Field"]:
         fields = list()
         if isinstance(obj_info, str):
             fields.append(cls(parent=parent, name=obj_info))
@@ -35,12 +36,12 @@ class Field:
 
 @define
 class World:
-    seed: int = None
+    seed: int
     fields: list[Field] = field(factory=list)
 
     @classmethod
-    def generate(cls, seed: Optional[int]=None):
-        instance = cls()
+    def generate(cls, seed: Optional[int] = None):
+        instance = cls(seed or hash(datetime.now()))
         instance.fields = load_field_info()
         return instance
 
