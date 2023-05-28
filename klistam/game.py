@@ -96,7 +96,7 @@ class FieldView:
 
     def draw_kachel(self, screen: pygame.Surface, x: int, y: int) -> None:
         """Draw a single part of the map."""
-        dreck = get_terrain("dreck")
+        dreck = get_terrain("dirt")
         screen.blit(dreck, (x * KG, y * KG, KG, KG), (0, 0, dreck.get_width(), dreck.get_height()))
 
 
