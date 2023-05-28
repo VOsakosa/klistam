@@ -1,18 +1,21 @@
 import traceback
+from typing import Final
+
 from typing_extensions import Self
 
 import pygame
 from attr import define
 
-KG = 50
-WIDTH = 10
-HEIGHT = 8
+KG: Final = 64
+WIDTH: Final = 10
+HEIGHT: Final = 8
 
 
 @define
 class Game:
     """The main class of the game that handles user input on the top level."""
     screen: pygame.Surface
+    hud: 'HUD'
 
     def handle_key(self, event) -> None:
         pass
@@ -29,9 +32,8 @@ class Game:
     @classmethod
     def create(cls) -> Self:
         pygame.init()
-        screen = pygame.display.set_mode(
-            (KG * WIDTH, KG * HEIGHT))
-        return cls(screen)
+        screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
+        return cls(screen, HUD())
 
     def run(self) -> None:
         clock = pygame.time.Clock()
@@ -53,6 +55,7 @@ class Game:
                     # self.draw_kachel()
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)
+                    self.hud.draw()
                     pygame.display.flip()
                     clock.tick(40)
                 except Exception:
@@ -60,6 +63,14 @@ class Game:
             self.save_game()
         finally:
             pygame.quit()
+
+
+@define
+class HUD:
+    """The Heads-Up-Display HUD is an overlay that is shown above the game elements and serves as a UI to the player."""
+
+    def draw(self):
+        pass
 
 
 if __name__ == '__main__':
