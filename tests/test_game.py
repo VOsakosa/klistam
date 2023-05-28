@@ -1,4 +1,4 @@
-from klistam.klistam import KlistamClass
+from klistam.klista import KlistamClass
 
 
 def test_klistam_load() -> None:

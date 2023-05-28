@@ -16,7 +16,7 @@ class Field:
     name: str
     walkable: bool = False
     parent: "Field | None" = None
-    children: "list(Field) | None" = field(factory=list)
+    children: "list[Field] | None" = field(factory=list)  # type: ignore
 
     def __str__(self):
         return self.name + (f"[{self.parent}]" if self.parent else "")
@@ -43,7 +43,7 @@ class Field:
 
 @define
 class Scene:
-    terrain: np.array
+    terrain: np.ndarray
     start_cord: tuple[int, int]
 
     def get_terrain_file(self, x, y):
@@ -106,7 +106,7 @@ class World:
             for j in range(width):
                 if i == j == 0:
                     continue
-                terrain[i][j] = np.random.choice(self.fields, p=get_weight(i, j))
+                terrain[i][j] = np.random.choice(self.fields, p=get_weight(i, j))  # type: ignore
 
         return Scene(terrain, start)
 
@@ -121,12 +121,16 @@ def load_field_info():
 
 
 if __name__ == "__main__":
-    test = World.generate(500)
-    WIDTH = 10
-    HEIGHT = 8
+    def main() -> None:
+        test = World.generate(500)
+        WIDTH = 10
+        HEIGHT = 8
 
-    scene = test.get_terrain((0, 0), HEIGHT, WIDTH)
-    for i in range(HEIGHT):
-        for j in range(WIDTH):
-            print(scene.get_terrain_file(j, i), end=" ")
-        print()
+        scene = test.get_terrain((0, 0), HEIGHT, WIDTH)
+        for i in range(HEIGHT):
+            for j in range(WIDTH):
+                print(scene.get_terrain_file(j, i), end=" ")
+            print()
+
+
+    main()
