@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://d0y1sxyttkkst"]
+
+[ext_resource type="Texture2D" uid="uid://pm43d5r5giix" path="res://icon.svg" id="1_fn4xv"]
+[ext_resource type="Script" path="res://player_sprite.gd" id="2_850ts"]
+
+[node name="Hauptmenü" type="Node2D"]
+
+[node name="player_sprite" type="Sprite2D" parent="."]
+position = Vector2(538, 305)
+texture = ExtResource("1_fn4xv")
+script = ExtResource("2_850ts")
+
+[node name="Button" type="Button" parent="."]
+offset_left = 443.0
+offset_top = 260.0
+offset_right = 626.0
+offset_bottom = 347.0
+text = "Start"
+
+[connection signal="pressed" from="Button" to="player_sprite" method="_on_button_pressed"]
