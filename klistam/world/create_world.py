@@ -100,6 +100,7 @@ class World:
                     weights.update(Counter(self.get_impact(terrain[cords[0]][cords[1]], factor)))
 
             norm = sum(weights.values())
+
             return [weights[f] / norm for f in self.fields]
 
         for i in range(height):

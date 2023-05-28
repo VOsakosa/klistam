@@ -2,7 +2,7 @@ import traceback
 from functools import cache
 from pathlib import Path
 from typing import Final
-
+import mypy
 from typing_extensions import Self
 
 import pygame
@@ -87,7 +87,7 @@ assets_folder = Path(__file__).parents[1] / "assets"
 
 @cache
 def get_terrain(name: str) -> pygame.Surface:
-    if name not in ["dirt", "grass", "tree"]:
+    if name not in ["dirt", "grass", "tree", "fir", "stone"]:
         name = "tree"
     return pygame.image.load(assets_folder / "images" / "terrain" / f"{name}.png").convert_alpha()
 
