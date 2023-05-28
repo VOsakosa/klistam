@@ -8,7 +8,8 @@ from typing_extensions import Self
 import pygame
 from attr import define
 
-from world.create_world import World, Scene
+from klistam.world.create_world import World, Scene
+from klistam import _
 
 KG: Final = 72
 WIDTH: Final = 10
@@ -42,6 +43,7 @@ class Game:
         return cls(screen, HUD(), scene=World.generate().get_terrain(width=WIDTH, height=HEIGHT), scene_view=SceneView())
 
     def run(self) -> None:
+        print(_("Game started"))
         clock = pygame.time.Clock()
         try:
             cont = True
