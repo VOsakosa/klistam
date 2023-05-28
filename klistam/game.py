@@ -2,7 +2,6 @@ import traceback
 from functools import cache
 from pathlib import Path
 from typing import Final
-import mypy
 from typing_extensions import Self
 
 import pygame
@@ -86,10 +85,17 @@ assets_folder = Path(__file__).parents[1] / "assets"
 
 
 @cache
-def get_terrain(name: str) -> pygame.Surface:
-    if name not in ["dirt", "grass", "tree", "fir", "stone"]:
-        name = "tree"
-    return pygame.image.load(assets_folder / "images" / "terrain" / f"{name}.png").convert_alpha()
+def get_terrain(name: str) -> pygame.Surface | None:
+    try:
+        ans = pygame.image.load(assets_folder / "images" / "terrain" / f"{name}.png").convert_alpha()
+        if name in ("grass", "dirt"):
+            return pygame.transform.scale(ans, (KG, KG))
+        else:
+            base = get_terrain("dirt")
+
+            return ans
+    except FileNotFoundError:
+        return None
 
 
 @define
@@ -103,8 +109,18 @@ class SceneView:
 
     def draw_kachel(self, terrain: str, screen: pygame.Surface, x: int, y: int) -> None:
         """Draw a single part of the map."""
-        dreck = get_terrain(terrain)
-        screen.blit(dreck, (x * KG, y * KG, KG, KG), (0, 0, dreck.get_width(), dreck.get_height()))
+        image = get_terrain(terrain)
+        if image:
+            if image not in ("grass", "dirt"):
+                dirt = get_terrain("dirt")
+                assert dirt
+                screen.blit(dirt, (x * KG, y * KG, KG, KG))
+            screen.blit(image, (x * KG, (1 + y) * KG - image.get_height(), KG, KG))
+        else:
+            # dirt = get_terrain("dirt")
+            # assert dirt
+            # screen.blit(dirt, (x * KG, y * KG, KG, KG))
+            pygame.draw.rect(screen, (70, 70, 70), (x * KG, y * KG, KG, KG))
 
 
 if __name__ == '__main__':

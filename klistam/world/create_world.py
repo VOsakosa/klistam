@@ -13,6 +13,7 @@ from collections import Counter
 
 @define(eq=False)
 class Field:
+    """A single tile in the world."""
     name: str
     walkable: bool = False
     parent: "Field | None" = None
@@ -43,6 +44,7 @@ class Field:
 
 @define
 class Scene:
+    """A fixed part of the world that is visible at once and fills the screen."""
     terrain: np.ndarray
     start_cord: tuple[int, int]
 
@@ -54,6 +56,7 @@ class Scene:
 
 @define
 class World:
+    """The entire world of the game."""
     seed: int = 0
     fields: list[Field] = field(factory=list)
 
@@ -87,7 +90,7 @@ class World:
         norm = sum(weight.values())
         return {key: val / norm for key, val in weight.items()}
 
-    def get_terrain(self, start: tuple[int, int] = (0, 0), height=32, width=32):
+    def get_terrain(self, start: tuple[int, int] = (0, 0), height: int = 32, width: int = 32) -> Scene:
         factor = 4 / 5
         random.seed(self.seed)
         terrain = np.empty(shape=(height, width), dtype=Field)
