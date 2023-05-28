@@ -1,0 +1,17 @@
+- name: "tree"
+  walkable: False
+  categories:
+    - name: "birch"
+      walkable: True
+    - oak
+    - fir
+
+- name: "bush"
+  walkable: True
+
+- name: "stone"
+  walkable: False
+
+- name: "flat"
+  walkable: True
+
