@@ -10,6 +10,8 @@ import random
 from pathlib import Path
 from collections import Counter
 
+from typing_extensions import Self
+
 
 @define(eq=False)
 class Field:
@@ -48,8 +50,8 @@ class Scene:
     terrain: np.ndarray
     start_cord: tuple[int, int]
 
-    def get_terrain_file(self, x, y):
-        tfield = self.terrain[y][x]
+    def get_terrain_file(self, x: int, y: int) -> str:
+        tfield: Field = self.terrain[y][x]
         assert tfield
         return tfield.name
 
@@ -61,12 +63,12 @@ class World:
     fields: list[Field] = field(factory=list)
 
     @classmethod
-    def generate(cls, seed: Optional[int] = None):
+    def generate(cls, seed: Optional[int] = None) -> Self:
         instance = cls(seed or hash(datetime.now()))
         instance.fields = load_field_info()
         return instance
 
-    def get_impact(self, field_type: Field, factor: float):
+    def get_impact(self, field_type: Field, factor: float) -> dict[Field, float]:
         weight = {f: 0 for f in self.fields}
         weight[field_type] = 1
 
@@ -115,7 +117,7 @@ class World:
         return Scene(terrain, start)
 
 
-def load_field_info():
+def load_field_info() -> list[Field]:
     with open(f"{Path(__file__).parent.resolve()}/ressources/fields.yml", 'r') as file:
         doc = yaml.safe_load(file)
         fields = list()
@@ -125,10 +127,12 @@ def load_field_info():
 
 
 if __name__ == "__main__":
+    WIDTH: int = 10
+    HEIGHT: int = 8
+
+
     def main() -> None:
         test = World.generate(500)
-        WIDTH = 10
-        HEIGHT = 8
 
         scene = test.get_terrain((0, 0), HEIGHT, WIDTH)
         for i in range(HEIGHT):
