@@ -40,4 +40,4 @@ jobs:
         pipenv run pytest
     - name: Mypy check
       run: |
-        pipenv run mypy --install-types --check-untyped-defs
+        pipenv run mypy --install-types --check-untyped-defs  --non-interactive ./klistam
