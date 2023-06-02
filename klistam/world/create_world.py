@@ -50,20 +50,31 @@ class Field:
 class Scene:
     """A fixed part of the world that is visible at once and fills the screen."""
     terrain: np.ndarray
-    start_cord: tuple[int, int]
+    start_coord: tuple[int, int]
+    _mobs: list[Mob] = field(factory=list)  # sortedcontainers.SortedKeyList ?
 
     def get_terrain_file(self, x: int, y: int) -> str:
-        tfield: Field = self.terrain[y][x]
-        assert tfield
-        return tfield.name
+        the_field: Field = self.terrain[y][x]
+        assert the_field
+        return the_field.name
 
 
 @define
 class World:
+    generator: "WorldGenerator"
+    _scenes: dict[tuple[int, int], Scene] = field(factory=dict)
+
+    def get_scene(self, coord: tuple[int, int]) -> Scene:
+        if coord not in self._scenes:
+            self._scenes[coord] = self.generator.get_terrain(coord)
+        return self._scenes[coord]
+
+
+@define
+class WorldGenerator:
     """The entire world of the game."""
     seed: int = 0
     fields: list[Field] = field(factory=list)
-    mobs: list[Mob] = field(factory=list)
 
     @classmethod
     def generate(cls, seed: Optional[int] = None) -> Self:
@@ -135,7 +146,7 @@ if __name__ == "__main__":
 
 
     def main() -> None:
-        test = World.generate(500)
+        test = WorldGenerator.generate(500)
 
         scene = test.get_terrain((0, 0), HEIGHT, WIDTH)
         for i in range(HEIGHT):

@@ -7,7 +7,7 @@ from typing_extensions import Self
 import pygame
 from attr import define, field
 
-from klistam.world.create_world import World, Scene
+from klistam.world.create_world import WorldGenerator, Scene
 from klistam import _
 
 KG: Final = 72
@@ -40,7 +40,8 @@ class Game:
     def create(cls) -> Self:
         pygame.init()
         screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
-        return cls(screen, scene=World.generate().get_terrain(width=WIDTH, height=HEIGHT), scene_view=SceneView())
+        return cls(screen, scene=WorldGenerator.generate().get_terrain(width=WIDTH, height=HEIGHT),
+                   scene_view=SceneView())
 
     def run(self) -> None:
         print(_("Game started"))
