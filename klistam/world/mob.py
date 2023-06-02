@@ -42,6 +42,8 @@ class Prop(enum.Enum):
 
     Bush = 0x140
 
+    # Should this really be here?
+    Player = 0x800
 
 @define
 class Mob:

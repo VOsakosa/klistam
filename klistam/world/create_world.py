@@ -12,6 +12,8 @@ from collections import Counter
 
 from typing_extensions import Self
 
+from klistam.world.mob import Mob
+
 
 @define(eq=False)
 class Field:
@@ -61,6 +63,7 @@ class World:
     """The entire world of the game."""
     seed: int = 0
     fields: list[Field] = field(factory=list)
+    mobs: list[Mob] = field(factory=list)
 
     @classmethod
     def generate(cls, seed: Optional[int] = None) -> Self:
@@ -118,7 +121,7 @@ class World:
 
 
 def load_field_info() -> list[Field]:
-    with open(f"{Path(__file__).parent.resolve()}/ressources/fields.yml", 'r') as file:
+    with open(f"{Path(__file__).parent.resolve()}/resources/fields.yml", 'r') as file:
         doc = yaml.safe_load(file)
         fields = list()
         for field_info in doc:
