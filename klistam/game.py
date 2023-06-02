@@ -5,7 +5,7 @@ from typing import Final
 from typing_extensions import Self
 
 import pygame
-from attr import define
+from attr import define, field
 
 from klistam.world.create_world import World, Scene
 from klistam import _
@@ -19,12 +19,13 @@ HEIGHT: Final = 8
 class Game:
     """The main class of the game that handles user input on the top level."""
     screen: pygame.Surface
-    hud: 'HUD'
     scene: Scene
     scene_view: 'SceneView'
 
     def handle_key(self, event) -> None:
-        pass
+        key = event.unicode
+        if not key:
+            key = pygame.key.name(event.key)
 
     def handle_mouse(self, event) -> None:
         pass
@@ -39,7 +40,7 @@ class Game:
     def create(cls) -> Self:
         pygame.init()
         screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
-        return cls(screen, HUD(), scene=World.generate().get_terrain(width=WIDTH, height=HEIGHT), scene_view=SceneView())
+        return cls(screen, scene=World.generate().get_terrain(width=WIDTH, height=HEIGHT), scene_view=SceneView())
 
     def run(self) -> None:
         print(_("Game started"))
@@ -63,7 +64,6 @@ class Game:
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)
                     self.scene_view.draw(self.screen, self.scene)
-                    self.hud.draw()
                     pygame.display.flip()
                     clock.tick(40)
                 except Exception:
@@ -101,11 +101,13 @@ def get_terrain(name: str) -> pygame.Surface | None:
 @define
 class SceneView:
     """Shows the scene to the user."""
+    hud: 'HUD' = field(factory=HUD)
 
     def draw(self, screen: pygame.Surface, scene: Scene):
         for y in range(HEIGHT):
             for x in range(WIDTH):
                 self.draw_kachel(terrain=scene.get_terrain_file(x, y), screen=screen, x=x, y=y)
+        self.hud.draw()
 
     def draw_kachel(self, terrain: str, screen: pygame.Surface, x: int, y: int) -> None:
         """Draw a single part of the map."""
