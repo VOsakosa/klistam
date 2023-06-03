@@ -1,8 +1,9 @@
 """
 script with terrain information
 """
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Optional, Any
+from typing import Optional, Any, Final
 from attrs import define, field
 import yaml
 import numpy as np
@@ -13,6 +14,9 @@ from collections import Counter
 from typing_extensions import Self
 
 from klistam.world.mob import Mob
+
+WIDTH: Final = 10
+HEIGHT: Final = 8
 
 
 @define(eq=False)
@@ -58,6 +62,11 @@ class Scene:
         assert the_field
         return the_field.name
 
+    @property
+    def mobs(self) -> Iterable[Mob]:
+        """Iterate over all mobs in the scene."""
+        return self._mobs
+
 
 @define
 class World:
@@ -99,8 +108,8 @@ class WorldGenerator:
             if sub_field.parent:
                 set_weight_up_stream(sub_field.parent, value * factor)
 
-        for tfield in self.fields:
-            set_weight_down_stream(tfield, 1)
+        for the_field in self.fields:
+            set_weight_down_stream(the_field, 1)
 
         set_weight_up_stream(field_type, 1)
         norm = sum(weight.values())
@@ -141,9 +150,6 @@ def load_field_info() -> list[Field]:
 
 
 if __name__ == "__main__":
-    WIDTH: int = 10
-    HEIGHT: int = 8
-
 
     def main() -> None:
         test = WorldGenerator.generate(500)

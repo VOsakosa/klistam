@@ -7,12 +7,11 @@ from typing_extensions import Self
 import pygame
 from attr import define, field
 
-from klistam.world.create_world import WorldGenerator, Scene
+from klistam.world.create_world import WorldGenerator, Scene, HEIGHT, WIDTH
 from klistam import _
+from klistam.world.mob import Mob
 
 KG: Final = 72
-WIDTH: Final = 10
-HEIGHT: Final = 8
 
 
 @define
@@ -93,8 +92,15 @@ def get_terrain(name: str) -> pygame.Surface | None:
             return pygame.transform.scale(ans, (KG, KG))
         else:
             base = get_terrain("dirt")
-
             return ans
+    except FileNotFoundError:
+        return None
+
+
+@cache
+def get_sprite_surface(name: str, scope: str) -> pygame.Surface | None:
+    try:
+        return pygame.image.load(assets_folder / "images" / scope / f"{name}.png").convert_alpha()
     except FileNotFoundError:
         return None
 
@@ -104,10 +110,13 @@ class SceneView:
     """Shows the scene to the user."""
     hud: 'HUD' = field(factory=HUD)
 
-    def draw(self, screen: pygame.Surface, scene: Scene):
+    def draw(self, screen: pygame.Surface, scene: Scene) -> None:
         for y in range(HEIGHT):
             for x in range(WIDTH):
                 self.draw_kachel(terrain=scene.get_terrain_file(x, y), screen=screen, x=x, y=y)
+        for mob in scene.mobs:
+            if mob.sprite and mob.position:
+                self.draw_mob(mob, screen)
         self.hud.draw()
 
     def draw_kachel(self, terrain: str, screen: pygame.Surface, x: int, y: int) -> None:
@@ -124,6 +133,15 @@ class SceneView:
             # assert dirt
             # screen.blit(dirt, (x * KG, y * KG, KG, KG))
             pygame.draw.rect(screen, (70, 70, 70), (x * KG, y * KG, KG, KG))
+
+    def draw_mob(self, mob: Mob, screen: pygame.Surface) -> None:
+        """Draw a mob."""
+        assert mob.sprite
+        assert mob.position
+        surface = get_sprite_surface(mob.sprite.name, mob.sprite.scope) or get_sprite_surface("unknown", "object")
+        assert surface
+        x, y = mob.position.scene_coordinates
+        screen.blit(surface, (x * KG))
 
 
 if __name__ == '__main__':

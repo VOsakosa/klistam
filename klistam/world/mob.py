@@ -8,18 +8,30 @@ import numpy as np
 from numpy.typing import NDArray
 
 from klistam import klista
+from klistam.world import create_world
 
 
-@define
+@define(frozen=True)
 class Sprite:
     """The image of an object."""
     name: str
+    scope: str = "object"
 
 
 @define
 class Position:
     # Shape (2,) Array of coordinates.
     coordinates: NDArray[np.int32]
+
+    @property
+    def scene_coordinates(self) -> NDArray[np.int32]:
+        """The coordinates inside the scene."""
+        return self.coordinates % np.array((create_world.WIDTH, create_world.HEIGHT))
+
+    @property
+    def scene(self) -> NDArray[np.int32]:
+        """The scene that this position belongs to."""
+        return self.coordinates // np.array((create_world.WIDTH, create_world.HEIGHT))
 
 
 @define
@@ -44,6 +56,7 @@ class Prop(enum.Enum):
 
     # Should this really be here?
     Player = 0x800
+
 
 @define
 class Mob:
