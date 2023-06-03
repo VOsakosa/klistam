@@ -6,6 +6,7 @@ import enum
 from attr import define
 import numpy as np
 from numpy.typing import NDArray
+from typing import Self
 
 from klistam import klista
 from klistam.world import create_world
@@ -23,15 +24,19 @@ class Position:
     # Shape (2,) Array of coordinates.
     coordinates: NDArray[np.int32]
 
-    @property
-    def scene_coordinates(self) -> NDArray[np.int32]:
-        """The coordinates inside the scene."""
-        return self.coordinates % np.array((create_world.WIDTH, create_world.HEIGHT))
+    @classmethod
+    def from_tuple(cls, coord: tuple[int, int]) -> Self:
+        return cls(np.array(coord))
 
     @property
-    def scene(self) -> NDArray[np.int32]:
+    def scene_coordinates(self) -> tuple[int, int]:
+        """The coordinates inside the scene."""
+        return tuple(self.coordinates % np.array((create_world.WIDTH, create_world.HEIGHT)))  # type: ignore
+
+    @property
+    def scene(self) -> tuple[int, int]:
         """The scene that this position belongs to."""
-        return self.coordinates // np.array((create_world.WIDTH, create_world.HEIGHT))
+        return tuple(self.coordinates // np.array((create_world.WIDTH, create_world.HEIGHT)))  # type: ignore
 
 
 @define
@@ -61,6 +66,6 @@ class Prop(enum.Enum):
 @define
 class Mob:
     """An object that moves on the fields."""
-    sprite: Sprite | None
-    position: Position | None
     typ: KlistamEncounter | Prop  # | Building
+    sprite: Sprite | None = None
+    position: Position | None = None

@@ -7,7 +7,7 @@ from typing_extensions import Self
 import pygame
 from attr import define, field
 
-from klistam.world.create_world import WorldGenerator, Scene, HEIGHT, WIDTH
+from klistam.world.create_world import Scene, HEIGHT, WIDTH, World
 from klistam import _
 from klistam.world.mob import Mob
 
@@ -18,7 +18,7 @@ KG: Final = 72
 class Game:
     """The main class of the game that handles user input on the top level."""
     screen: pygame.Surface
-    scene: Scene
+    world: World
     scene_view: 'SceneView'
 
     def handle_key(self, event) -> None:
@@ -39,8 +39,8 @@ class Game:
     def create(cls) -> Self:
         pygame.init()
         screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
-        return cls(screen, scene=WorldGenerator.generate().get_terrain(width=WIDTH, height=HEIGHT),
-                   scene_view=SceneView())
+        world = World.generate()
+        return cls(screen, world=world, scene_view=SceneView())
 
     def run(self) -> None:
         print(_("Game started"))
@@ -63,7 +63,7 @@ class Game:
                     # self.draw_kachel()
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)
-                    self.scene_view.draw(self.screen, self.scene)
+                    self.scene_view.draw(self.screen, self.world.get_player_scene())
                     pygame.display.flip()
                     clock.tick(40)
                 except Exception:
@@ -141,7 +141,7 @@ class SceneView:
         surface = get_sprite_surface(mob.sprite.name, mob.sprite.scope) or get_sprite_surface("unknown", "object")
         assert surface
         x, y = mob.position.scene_coordinates
-        screen.blit(surface, (x * KG))
+        screen.blit(surface, (x * KG + (KG - surface.get_width()) // 2, y * KG - surface.get_height()))
 
 
 if __name__ == '__main__':

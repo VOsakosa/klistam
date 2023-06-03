@@ -13,10 +13,10 @@ from collections import Counter
 
 from typing_extensions import Self
 
-from klistam.world.mob import Mob
+from klistam.world.mob import Mob, Position, Prop, Sprite
 
-WIDTH: Final = 10
-HEIGHT: Final = 8
+WIDTH: Final = 18
+HEIGHT: Final = 12
 
 
 @define(eq=False)
@@ -55,7 +55,7 @@ class Scene:
     """A fixed part of the world that is visible at once and fills the screen."""
     terrain: np.ndarray
     start_coord: tuple[int, int]
-    _mobs: list[Mob] = field(factory=list)  # sortedcontainers.SortedKeyList ?
+    _mobs: list[Mob] = field(factory=list)  # sortedcontainers.SortedKeyList ? -> Mob must be freezed.
 
     def get_terrain_file(self, x: int, y: int) -> str:
         the_field: Field = self.terrain[y][x]
@@ -67,16 +67,50 @@ class Scene:
         """Iterate over all mobs in the scene."""
         return self._mobs
 
+    def add_mob(self, mob: Mob):
+        assert mob not in self._mobs
+        self._mobs.append(mob)
+
+    def remove_mob(self, mob: Mob):
+        self._mobs.remove(mob)
+
 
 @define
 class World:
     generator: "WorldGenerator"
     _scenes: dict[tuple[int, int], Scene] = field(factory=dict)
+    player: Mob | None = None
 
     def get_scene(self, coord: tuple[int, int]) -> Scene:
         if coord not in self._scenes:
             self._scenes[coord] = self.generator.get_terrain(coord)
         return self._scenes[coord]
+
+    def get_player_scene(self) -> Scene:
+        """Return the Scene that the player is in. If there is no player, the scene at the origin is returned."""
+        if self.player and self.player.position:
+            return self.get_scene(self.player.position.scene)
+        return self.get_scene((0, 0))
+
+    @classmethod
+    def generate(cls, seed: int | None = None) -> Self:
+        self = cls(WorldGenerator.generate(seed))
+        # Place player
+        self.player = Mob(sprite=Sprite("gnome_f_behind", scope="player"), typ=Prop.Player)
+        self.summon(self.player, (WIDTH // 2, HEIGHT // 2))
+        return self
+
+    def summon(self, mob: Mob, position: tuple[int, int]) -> None:
+        if mob.position:
+            old_scene = self.get_scene(mob.position.scene)
+            old_scene.remove_mob(mob)
+        mob.position = self.find_free_position(position)
+        scene = self.get_scene(mob.position.scene)
+        scene.add_mob(mob)
+
+    def find_free_position(self, position: tuple[int, int]) -> Position:
+        # TODO: Find free position
+        return Position.from_tuple(position)
 
 
 @define
