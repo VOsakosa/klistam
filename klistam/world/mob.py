@@ -6,7 +6,7 @@ import enum
 from attr import define
 import numpy as np
 from numpy.typing import NDArray
-from typing import Self
+from typing_extensions import Self
 
 from klistam import klista
 from klistam.world import create_world
