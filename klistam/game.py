@@ -7,7 +7,8 @@ from typing_extensions import Self
 import pygame
 from attr import define, field
 
-from klistam.world.create_world import Scene, HEIGHT, WIDTH, World
+from klistam.world.create_world import Scene, World
+from klistam.world import WIDTH, HEIGHT
 from klistam import _
 from klistam.world.mob import Mob
 

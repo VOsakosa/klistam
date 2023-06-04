@@ -2,14 +2,15 @@
 
 """
 import enum
+from typing import Literal
 
 from attr import define
 import numpy as np
 from numpy.typing import NDArray
 from typing_extensions import Self
 
+from klistam import world as world_module
 from klistam import klista
-from klistam.world import create_world
 
 
 @define(frozen=True)
@@ -31,12 +32,36 @@ class Position:
     @property
     def scene_coordinates(self) -> tuple[int, int]:
         """The coordinates inside the scene."""
-        return tuple(self.coordinates % np.array((create_world.WIDTH, create_world.HEIGHT)))  # type: ignore
+        return tuple(self.coordinates % np.array((world_module.WIDTH, world_module.HEIGHT)))  # type: ignore
 
     @property
     def scene(self) -> tuple[int, int]:
         """The scene that this position belongs to."""
-        return tuple(self.coordinates // np.array((create_world.WIDTH, create_world.HEIGHT)))  # type: ignore
+        return tuple(self.coordinates // np.array((world_module.WIDTH, world_module.HEIGHT)))  # type: ignore
+
+
+@define
+class Movement:
+    direction: NDArray[np.int32]
+    progress: float = 1.
+
+    @classmethod
+    def from_name(cls, name: Literal["right", "left", "up", "down"]):
+        if name == "right":
+            ans = (1, 0)
+        elif name == "left":
+            ans = (-1, 0)
+        elif name == "up":
+            ans = (0, -1)
+        elif name == "down":
+            ans = (0, 1)
+        else:
+            raise ValueError(f"Illegal direction name {name}")
+        return Movement(np.array(ans, np.int32))
+
+    @property
+    def offset(self) -> NDArray[np.float_]:
+        return self.progress * self.direction
 
 
 @define
@@ -69,3 +94,4 @@ class Mob:
     typ: KlistamEncounter | Prop  # | Building
     sprite: Sprite | None = None
     position: Position | None = None
+    movement: Movement | None = None

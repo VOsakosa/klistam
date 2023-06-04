@@ -3,7 +3,7 @@ script with terrain information
 """
 from collections.abc import Iterable
 from datetime import datetime
-from typing import Optional, Any, Final
+from typing import Optional, Any
 from attrs import define, field
 import yaml
 import numpy as np
@@ -13,10 +13,8 @@ from collections import Counter
 
 from typing_extensions import Self
 
+from klistam.world import WIDTH, HEIGHT
 from klistam.world.mob import Mob, Position, Prop, Sprite
-
-WIDTH: Final = 18
-HEIGHT: Final = 12
 
 
 @define(eq=False)
