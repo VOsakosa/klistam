@@ -42,6 +42,8 @@ class Position:
 
 @define
 class Movement:
+    """A shown movement of the mob. The position of the mob is changed on the start of the movement, so a movement
+    to the right will cause the mob to be shown to the left of its actual position."""
     direction: NDArray[np.int32]
     progress: float = 1.
 
@@ -61,7 +63,7 @@ class Movement:
 
     @property
     def offset(self) -> NDArray[np.float_]:
-        return self.progress * self.direction
+        return -self.progress * self.direction
 
 
 @define
@@ -88,7 +90,7 @@ class Prop(enum.Enum):
     Player = 0x800
 
 
-@define
+@define(eq=False)
 class Mob:
     """An object that moves on the fields."""
     typ: KlistamEncounter | Prop  # | Building

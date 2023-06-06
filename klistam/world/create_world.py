@@ -3,10 +3,12 @@ script with terrain information
 """
 from collections.abc import Iterable
 from datetime import datetime
+from itertools import count
 from typing import Optional, Any
 from attrs import define, field
 import yaml
 import numpy as np
+from numpy.typing import NDArray
 import random
 from pathlib import Path
 from collections import Counter
@@ -73,10 +75,15 @@ class Scene:
         self._mobs.remove(mob)
 
 
+def to_2tuple(coord_array: NDArray[np.int32]) -> tuple[int, int]:
+    assert len(coord_array) == 2
+    return tuple(coord_array)  # type: ignore
+
+
 @define
 class World:
     generator: "WorldGenerator"
-    _scenes: dict[tuple[int, int], Scene] = field(factory=dict)
+    _scenes: dict[tuple[int, int], Scene] = field(factory=dict, repr=False)
     player: Mob | None = None
 
     def get_scene(self, coord: tuple[int, int]) -> Scene:
@@ -89,6 +96,12 @@ class World:
         if self.player and self.player.position:
             return self.get_scene(self.player.position.scene)
         return self.get_scene((0, 0))
+
+    def get_object_at(self, coord: NDArray[np.int32]) -> None | Mob:
+        for mob in self.get_scene(Position(coord).scene).mobs:
+            if mob.position and np.array_equal(mob.position.coordinates, coord):
+                return mob
+        return None
 
     @classmethod
     def generate(cls, seed: int | None = None) -> Self:
@@ -107,15 +120,25 @@ class World:
         scene.add_mob(mob)
 
     def find_free_position(self, position: tuple[int, int]) -> Position:
-        # TODO: Find free position
-        return Position.from_tuple(position)
+        check_dir = np.array((0, -1))
+        check_pos = np.array(position)
+        circulation_matrix = np.array(((0, -1), (1, 0)))  # counter-clockwise
+        if not self.get_object_at(check_pos):
+            return Position(check_pos)
+        for segment in count():
+            for _pos in range(segment // 2):
+                check_pos += check_dir
+                if not self.get_object_at(check_pos):
+                    return Position(check_pos)
+            check_dir = check_dir @ circulation_matrix
+        raise ValueError("Unreachable code.")
 
 
 @define
 class WorldGenerator:
     """The entire world of the game."""
     seed: int = 0
-    fields: list[Field] = field(factory=list)
+    fields: list[Field] = field(factory=list, repr=False)
 
     @classmethod
     def generate(cls, seed: Optional[int] = None) -> Self:

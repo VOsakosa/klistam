@@ -1,5 +1,6 @@
 import traceback
 from functools import cache
+import numpy as np
 from pathlib import Path
 from typing import Final
 from typing_extensions import Self
@@ -10,9 +11,10 @@ from attr import define, field
 from klistam.world.create_world import Scene, World
 from klistam.world import WIDTH, HEIGHT
 from klistam import _
-from klistam.world.mob import Mob
+from klistam.world.mob import Mob, Movement
 
 KG: Final = 72
+MOVEMENT_SPEED: Final = 0.05
 
 
 @define
@@ -26,12 +28,25 @@ class Game:
         key = event.unicode
         if not key:
             key = pygame.key.name(event.key)
+        if key == "q":
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
 
     def handle_mouse(self, event) -> None:
         pass
 
     def handle_pressed(self) -> None:
         """Handle continuous key presses."""
+        player = self.world.player
+        if player:
+            if not player.position or player.movement:
+                pass
+            elif pygame.key.get_pressed()[pygame.K_RIGHT]:
+                player.movement = Movement.from_name("right")
+                player.position.coordinates += np.array((1, 0))  # TODO: This might change the player's scene
+            if player.movement:
+                player.movement.progress -= MOVEMENT_SPEED
+                if player.movement.progress <= 0.:
+                    player.movement = None
 
     def save_game(self) -> None:
         pass
@@ -142,7 +157,13 @@ class SceneView:
         surface = get_sprite_surface(mob.sprite.name, mob.sprite.scope) or get_sprite_surface("unknown", "object")
         assert surface
         x, y = mob.position.scene_coordinates
-        screen.blit(surface, (x * KG + (KG - surface.get_width()) // 2, y * KG - surface.get_height()))
+        x *= KG
+        y *= KG
+        if mob.movement:
+            offset = np.rint(mob.movement.offset * KG)
+            x += offset[0]
+            y += offset[1]
+        screen.blit(surface, (x + (KG - surface.get_width()) // 2, y - surface.get_height()))
 
 
 if __name__ == '__main__':
