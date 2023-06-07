@@ -111,20 +111,26 @@ class World:
         self.summon(self.player, (WIDTH // 2, HEIGHT // 2))
         return self
 
-    def summon(self, mob: Mob, position: tuple[int, int]) -> None:
-        if mob.position:
-            old_scene = self.get_scene(mob.position.scene)
-            old_scene.remove_mob(mob)
+    def summon(self, mob: Mob, position: tuple[int, int] | NDArray[np.int32]) -> None:
+        """Summon a mob at a position. If the mob was on the map before, it is correctly removed."""
+        self.remove_mob(mob)
         mob.position = self.find_free_position(position)
         scene = self.get_scene(mob.position.scene)
         scene.add_mob(mob)
 
-    def find_free_position(self, position: tuple[int, int]) -> Position:
-        check_dir = np.array((0, -1))
+    def remove_mob(self, mob: Mob) -> None:
+        if mob.position:
+            old_scene = self.get_scene(mob.position.scene)
+            old_scene.remove_mob(mob)
+            mob.position = None
+
+    def find_free_position(self, position: tuple[int, int] | NDArray[np.int32]) -> Position:
+        """Find a free position to place an object around a position."""
         check_pos = np.array(position)
-        circulation_matrix = np.array(((0, -1), (1, 0)))  # counter-clockwise
         if not self.get_object_at(check_pos):
             return Position(check_pos)
+        check_dir = np.array((0, -1))
+        circulation_matrix = np.array(((0, -1), (1, 0)))  # counter-clockwise
         for segment in count():
             for _pos in range(segment // 2):
                 check_pos += check_dir

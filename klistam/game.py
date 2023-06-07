@@ -16,6 +16,13 @@ from klistam.world.mob import Mob, Movement
 KG: Final = 72
 MOVEMENT_SPEED: Final = 0.05
 
+MOVEMENTS: Final = (
+    (np.array((1, 0)), pygame.K_RIGHT),
+    (np.array((-1, 0)), pygame.K_LEFT),
+    (np.array((0, -1)), pygame.K_UP),
+    (np.array((0, 1)), pygame.K_DOWN)
+)
+
 
 @define
 class Game:
@@ -40,9 +47,16 @@ class Game:
         if player:
             if not player.position or player.movement:
                 pass
-            elif pygame.key.get_pressed()[pygame.K_RIGHT]:
-                player.movement = Movement.from_name("right")
-                player.position.coordinates += np.array((1, 0))  # TODO: This might change the player's scene
+            else:
+                for direction, key in MOVEMENTS:
+                    if pygame.key.get_pressed()[key]:
+                        player.movement = Movement(direction)
+                        target = player.position.coordinates + direction
+                        if obj := self.world.get_object_at(target):
+                            print(_("The player walked against {obj}").format(obj=obj))
+                        else:
+                            self.world.summon(player, target)
+                        break
             if player.movement:
                 player.movement.progress -= MOVEMENT_SPEED
                 if player.movement.progress <= 0.:
