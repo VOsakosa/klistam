@@ -177,7 +177,7 @@ class SceneView:
             offset = np.rint(mob.movement.offset * KG)
             x += offset[0]
             y += offset[1]
-        screen.blit(surface, (x + (KG - surface.get_width()) // 2, y - surface.get_height()))
+        screen.blit(surface, (x + (KG - surface.get_width()) // 2, y - surface.get_height() + KG))
 
 
 if __name__ == '__main__':
