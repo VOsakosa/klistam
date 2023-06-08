@@ -69,8 +69,10 @@ class Game:
     @classmethod
     def create(cls) -> Self:
         pygame.init()
-        screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
         world = World.generate()
+        # Loads the neighboring scenes
+        world.tick()
+        screen = pygame.display.set_mode((KG * WIDTH, KG * HEIGHT))
         return cls(screen, world=world, scene_view=SceneView())
 
     def run(self) -> None:
