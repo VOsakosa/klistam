@@ -16,12 +16,13 @@ from attrs import define, field
 from numpy.typing import NDArray
 from typing_extensions import Self
 
+from klistam.klista import Klistam, KlistamClass
 from klistam.world import WIDTH, HEIGHT
 from klistam.world.mob import Mob, Position, Prop, Sprite, KlistamEncounter
 
 LOAD_RADIUS = 3
 ENCOUNTER_TIME = 120 * 30
-SPAWN_RATE = 1 / 0x10000
+SPAWN_RATE = 1 / 0x1000
 
 
 @define(eq=False)
@@ -172,8 +173,8 @@ class World:
                 print(f"Spawn Encounter at {position}")
                 start = self.time - scipy.stats.randint.rvs(0, time_since_update)
                 self.summon(Mob(
-                    typ=KlistamEncounter(  # TODO Add klistam
-                        None, start, self.time + ENCOUNTER_TIME),  # type: ignore
+                    typ=KlistamEncounter(Klistam(KlistamClass.load_classes()["wood_idol"]),
+                                         start, self.time + ENCOUNTER_TIME),
                     sprite=Sprite("encounter"),
                 ), position)
 

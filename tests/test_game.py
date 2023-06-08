@@ -18,6 +18,10 @@ description: >-
     assert wood_idol.energy_cost == 0.001
 
 
+def test_klistam_class() -> None:
+    assert "wood_idol" in KlistamClass.load_classes()
+
+
 def test_find_free_position() -> None:
     # Create an empty world
     world = World(WorldGenerator.generate())
