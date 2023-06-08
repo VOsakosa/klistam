@@ -20,7 +20,7 @@ class Sprite:
     scope: str = "object"
 
 
-@define
+@define(repr=False)
 class Position:
     # Shape (2,) Array of coordinates.
     coordinates: NDArray[np.int32]
@@ -38,6 +38,9 @@ class Position:
     def scene(self) -> tuple[int, int]:
         """The scene that this position belongs to."""
         return tuple(self.coordinates // np.array((world_module.WIDTH, world_module.HEIGHT)))  # type: ignore
+
+    def __repr__(self) -> str:
+        return f"Position({self.coordinates[0]}, {self.coordinates[1]})"
 
 
 @define
