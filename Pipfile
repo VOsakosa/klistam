@@ -9,6 +9,7 @@ pygame = "*"
 numpy = "*"
 typing-extensions = "*"
 pyyaml = "*"
+scipy = "*"
 
 [dev-packages]
 

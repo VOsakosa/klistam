@@ -89,7 +89,7 @@ class Game:
                         elif event.type == pygame.MOUSEBUTTONDOWN:
                             self.handle_mouse(event)
                     self.handle_pressed()
-                    # self.tick()
+                    self.world.tick()
                     # self.draw_kachel()
                     # self.draw_inventar()
                     # self.status_panel.tick(self.screen)

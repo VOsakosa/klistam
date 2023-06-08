@@ -1,22 +1,27 @@
 """
 script with terrain information
 """
+import random
+from collections import Counter
 from collections.abc import Iterable
 from datetime import datetime
 from itertools import count
-from typing import Optional, Any
-from attrs import define, field
-import yaml
-import numpy as np
-from numpy.typing import NDArray
-import random
 from pathlib import Path
-from collections import Counter
+from typing import Optional, Any
 
+import numpy as np
+import scipy  # type: ignore
+import yaml
+from attrs import define, field
+from numpy.typing import NDArray
 from typing_extensions import Self
 
 from klistam.world import WIDTH, HEIGHT
-from klistam.world.mob import Mob, Position, Prop, Sprite
+from klistam.world.mob import Mob, Position, Prop, Sprite, KlistamEncounter
+
+LOAD_RADIUS = 3
+ENCOUNTER_TIME = 120 * 30
+SPAWN_RATE = 1 / 0x10000
 
 
 @define(eq=False)
@@ -56,6 +61,7 @@ class Scene:
     terrain: np.ndarray
     start_coord: tuple[int, int]
     _mobs: list[Mob] = field(factory=list)  # sortedcontainers.SortedKeyList ? -> Mob must be freezed.
+    update_time: float = float("-inf")
 
     def get_terrain_file(self, x: int, y: int) -> str:
         the_field: Field = self.terrain[y][x]
@@ -74,6 +80,9 @@ class Scene:
     def remove_mob(self, mob: Mob):
         self._mobs.remove(mob)
 
+    def remove_mob_idx(self, idx: int):
+        del self._mobs[idx]
+
 
 def to_2tuple(coord_array: NDArray[np.int32]) -> tuple[int, int]:
     assert len(coord_array) == 2
@@ -85,6 +94,7 @@ class World:
     generator: "WorldGenerator"
     _scenes: dict[tuple[int, int], Scene] = field(factory=dict, repr=False)
     player: Mob | None = None
+    time: int = 0
 
     def get_scene(self, coord: tuple[int, int]) -> Scene:
         if coord not in self._scenes:
@@ -138,6 +148,44 @@ class World:
                     return Position(check_pos)
             check_dir = check_dir @ circulation_matrix
         raise ValueError("Unreachable code.")
+
+    def tick(self):
+        self.time += 1
+        for scene in self.get_loaded_scenes():
+            self.tick_scene(scene)
+
+    def get_loaded_scenes(self) -> Iterable[Scene]:
+        if self.player and self.player.position:
+            middle_x, middle_y = self.player.position.scene
+            for x in range(middle_x - LOAD_RADIUS - 1, middle_x + LOAD_RADIUS):
+                for y in range(middle_y - LOAD_RADIUS - 1, middle_y + LOAD_RADIUS):
+                    yield self.get_scene((x, y))
+
+    def tick_scene(self, scene: Scene):
+        # Spawning
+        time_since_update = min(self.time - scene.update_time, ENCOUNTER_TIME)
+        amount = scipy.stats.poisson.rvs(time_since_update * SPAWN_RATE)
+        for spawn_x, spawn_y in zip(scipy.stats.randint.rvs(0, WIDTH, size=amount),
+                                    scipy.stats.randint.rvs(0, HEIGHT, size=amount)):
+            position = np.array((WIDTH, HEIGHT)) * scene.start_coord + (spawn_x, spawn_y)
+            if not self.get_object_at(position):
+                print(f"Spawn Encounter at {position}")
+                start = self.time - scipy.stats.randint.rvs(0, time_since_update)
+                self.summon(Mob(
+                    typ=KlistamEncounter(  # TODO Add klistam
+                        None, start, self.time + ENCOUNTER_TIME),  # type: ignore
+                    sprite=Sprite("encounter"),
+                ), position)
+
+        to_remove = []
+        for i, mob in enumerate(scene.mobs):
+            if isinstance(mob.typ, KlistamEncounter):
+                if mob.typ.end and mob.typ.end < self.time:
+                    to_remove.append(i)
+                    print(f"Remove encounter at {mob.position}")
+        for i in to_remove:
+            scene.remove_mob_idx(i)
+        scene.update_time = self.time
 
 
 @define
