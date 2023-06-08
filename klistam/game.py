@@ -50,11 +50,12 @@ class Game:
             else:
                 for direction, key in MOVEMENTS:
                     if pygame.key.get_pressed()[key]:
-                        player.movement = Movement(direction)
                         target = player.position.coordinates + direction
                         if obj := self.world.get_object_at(target):
                             print(_("The player walked against {obj}").format(obj=obj))
+                            player.movement = Movement(np.array((0, 0)))
                         else:
+                            player.movement = Movement(direction)
                             self.world.summon(player, target)
                         break
             if player.movement:

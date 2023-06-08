@@ -174,7 +174,7 @@ class World:
                 start = self.time - scipy.stats.randint.rvs(0, time_since_update)
                 self.summon(Mob(
                     typ=KlistamEncounter(Klistam(KlistamClass.load_classes()["wood_idol"]),
-                                         start, self.time + ENCOUNTER_TIME),
+                                         start, start + ENCOUNTER_TIME),
                     sprite=Sprite("encounter"),
                 ), position)
 
@@ -184,7 +184,7 @@ class World:
                 if mob.typ.end and mob.typ.end < self.time:
                     to_remove.append(i)
                     print(f"Remove encounter at {mob.position}")
-        for i in to_remove:
+        for i in reversed(to_remove):
             scene.remove_mob_idx(i)
         scene.update_time = self.time
 
