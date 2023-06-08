@@ -131,7 +131,7 @@ class World:
             return Position(check_pos)
         check_dir = np.array((0, -1))
         circulation_matrix = np.array(((0, -1), (1, 0)))  # counter-clockwise
-        for segment in count():
+        for segment in count(2):
             for _pos in range(segment // 2):
                 check_pos += check_dir
                 if not self.get_object_at(check_pos):

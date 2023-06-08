@@ -19,7 +19,7 @@ description: >-
 
 
 def test_find_free_position() -> None:
-    # Create a empty world
+    # Create an empty world
     world = World(WorldGenerator.generate())
     # noinspection PyTypeChecker
     world._scenes[0, 0] = Scene(np.full((WIDTH, HEIGHT), world.generator.fields[0]), (0, 0))
